@@ -28,6 +28,11 @@ namespace leave_management.Repository
             return _db.LeaveTypes.Find(id);
         }
 
+        public bool Exists(int id)
+        {
+            return _db.LeaveTypes.Any(lt => lt.Id == id);
+        }
+
         public bool Create(LeaveType entity)
         {
             _db.LeaveTypes.Add(entity);
