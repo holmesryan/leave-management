@@ -35,7 +35,7 @@ namespace leave_management.Repository
 
         public bool Exists(int id)
         {
-            return _db.LeaveHistories.Any(la => la.Id == id);
+            return _db.LeaveRequests.Any(la => la.Id == id);
         }
 
         public bool Create(LeaveAllocation entity)
@@ -78,6 +78,14 @@ namespace leave_management.Repository
             return FindAll()
                 .Where(la => la.EmployeeId == id && la.Period == period)
                 .ToList();
+        }
+
+        public LeaveAllocation GetLeaveAllocationsByEmployeeAndType(string employeeId, int leaveTypeId)
+        {
+            var period = DateTime.Today.Year;
+
+            return FindAll()
+                .FirstOrDefault(la => la.EmployeeId == employeeId && la.Period == period && la.LeaveTypeId == leaveTypeId);
         }
     }
 }
