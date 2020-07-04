@@ -3,6 +3,7 @@ using leave_management.Contracts;
 using leave_management.Data;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace leave_management.Repository
@@ -18,74 +19,75 @@ namespace leave_management.Repository
         }
 
 
-        public ICollection<LeaveAllocation> FindAll()
+        public async Task<ICollection<LeaveAllocation>> FindAll()
         {
-            return _db.LeaveAllocations
+            return await _db.LeaveAllocations
                 .Include(q => q.LeaveType)
-                .ToList();
+                .ToListAsync();
         }
 
-        public LeaveAllocation FindById(int id)
+        public async Task<LeaveAllocation> FindById(int id)
         {
-            return _db.LeaveAllocations
+            return await _db.LeaveAllocations
                 .Include(q => q.LeaveType)
                 .Include(q => q.Employee)
-                .FirstOrDefault(q => q.Id == id);
+                .FirstOrDefaultAsync(q => q.Id == id);
         }
 
-        public bool Exists(int id)
+        public async Task<bool> Exists(int id)
         {
-            return _db.LeaveRequests.Any(la => la.Id == id);
+            return await _db.LeaveRequests.AnyAsync(la => la.Id == id);
         }
 
-        public bool Create(LeaveAllocation entity)
+        public async Task<bool> Create(LeaveAllocation entity)
         {
-            _db.LeaveAllocations.Add(entity);
+            await _db.LeaveAllocations.AddAsync(entity);
 
-            return Save();
+            return await Save();
         }
 
-        public bool Update(LeaveAllocation entity)
+        public async Task<bool> Update(LeaveAllocation entity)
         {
             _db.LeaveAllocations.Update(entity);
 
-            return Save();
+            return await Save();
         }
 
-        public bool Delete(LeaveAllocation entity)
+        public async Task<bool> Delete(LeaveAllocation entity)
         {
             _db.LeaveAllocations.Remove(entity);
 
-            return Save();
+            return await Save();
         }
 
-        public bool Save()
+        public async Task<bool> Save()
         {
-            return _db.SaveChanges() > 0;
+            return await _db.SaveChangesAsync() > 0;
         }
 
-        public bool CheckAllocation(int leaveTypeId, string employeeId)
-        {
-            var period = DateTime.Today.Year;
-
-            return FindAll().Any(la => la.EmployeeId == employeeId && la.LeaveTypeId == leaveTypeId && la.Period == period);
-        }
-
-        public ICollection<LeaveAllocation> GetLeaveAllocationsByEmployee(string id)
+        public async Task<bool> CheckAllocation(int leaveTypeId, string employeeId)
         {
             var period = DateTime.Today.Year;
+            var allocations = await FindAll();
 
-            return FindAll()
-                .Where(la => la.EmployeeId == id && la.Period == period)
+            return allocations.Any(la => la.EmployeeId == employeeId && la.LeaveTypeId == leaveTypeId && la.Period == period);
+        }
+
+        public async Task<ICollection<LeaveAllocation>> GetLeaveAllocationsByEmployee(string id)
+        {
+            var period = DateTime.Today.Year;
+            var allocations = await FindAll();
+
+            return allocations.Where(la => la.EmployeeId == id && la.Period == period)
                 .ToList();
         }
 
-        public LeaveAllocation GetLeaveAllocationsByEmployeeAndType(string employeeId, int leaveTypeId)
+        public async Task<LeaveAllocation> GetLeaveAllocationsByEmployeeAndType(string employeeId, int leaveTypeId)
         {
             var period = DateTime.Today.Year;
+            var allocations = await FindAll();
 
-            return FindAll()
-                .FirstOrDefault(la => la.EmployeeId == employeeId && la.Period == period && la.LeaveTypeId == leaveTypeId);
+            return allocations.FirstOrDefault(la => la.EmployeeId == employeeId && la.Period == period && la.LeaveTypeId == leaveTypeId);
         }
     }
 }
